@@ -10,11 +10,11 @@ export default async function handler(req, res) {
     // Serialisasi kedua field (text dan lastUpdated) ke dalam base64
     const contentToSave = { text, lastUpdated };
     const content = Buffer.from(JSON.stringify(contentToSave)).toString('base64');
-    
+    const endUrl = process.env.ENDPOINT_URL;
     const token = process.env.GITHUB_TOKEN;
 
     // Ambil SHA dari file data.json di GitHub
-    const shaRes = await fetch("https://api.github.com/repos/dhyox/RText/contents/data.json", {
+    const shaRes = await fetch(`${endUrl}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     }
 
     // Update file data.json
-    const response = await fetch("https://api.github.com/repos/dhyox/RText/contents/data.json", {
+    const response = await fetch(`${endUrl}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,

@@ -1,8 +1,9 @@
 export default async function handler(req, res) {
   try {
+    const endUrl = process.env.ENDPOINT_URL;
     const token = process.env.GITHUB_TOKEN;
     const response = await fetch(
-      "https://api.github.com/repos/dhyox/RText/contents/data.json",
+      `${endUrl}`,
       {
         headers: { Authorization: `Bearer ${token}` },
         cache: 'no-store'

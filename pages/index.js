@@ -24,23 +24,33 @@ export default function Home() {
   const [message, showMessage] = useMessage();
 
 
-  // NOTE: Di lingkungan nyata, ini akan berinteraksi dengan API backend, 
-  // bukan Firebase langsung. Kami mempertahankan struktur API call yang ada 
-  // untuk simulasi sederhana.
-
+  // --- FUNGSI LOAD DENGAN PANGGILAN API BARU ---
   const loadText = async () => {
-    // Karena kita tidak memiliki endpoint API yang sebenarnya di sini, 
-    // kita akan menggunakan localStorage sebagai fallback untuk simulasi, 
-    // sambil mempertahankan struktur async.
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const loadedText = localStorage.getItem('editorText') || 'Teks awal. Mulai mengetik di sini!';
+      // Panggil endpoint API yang di-host oleh load.js
+      const response = await fetch('/api/load', {
+        method: 'GET',
+        // Penting: Nonaktifkan cache untuk memastikan selalu mendapatkan data terbaru
+        headers: { 'Cache-Control': 'no-cache' } 
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Mengambil properti 'text' dari respons JSON (sesuai format data.json)
+      const loadedText = data.text || 'Teks awal. Mulai mengetik di sini!';
+      
       setText(loadedText);
-      showMessage('Teks dimuat.');
+      showMessage('Text Loaded.');
     } catch (error) {
-      console.error("Error loading text:", error);
-      showMessage('Gagal memuat teks.');
+      console.error("Error loading text from API:", error);
+      // Fallback ke teks default jika gagal memuat
+      setText('Gagal memuat teks dari GitHub. Mulai mengetik di sini!'); 
+      showMessage('Failed load text.');
     } finally {
       setLoading(false);
     }
@@ -50,15 +60,32 @@ export default function Home() {
     loadText();
   }, []);
 
+  // --- FUNGSI SAVE DENGAN PANGGILAN API BARU ---
   const saveText = async () => {
-    // Simulasi penyimpanan ke API/database menggunakan localStorage
+    setLoading(true);
     try {
-      localStorage.setItem('editorText', text);
-      await new Promise(resolve => setTimeout(resolve, 200)); // Simulasi latensi
-      showMessage('Tersimpan!');
+      // Panggil endpoint API yang di-host oleh save.js
+      const response = await fetch('/api/save', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+        },
+        // Kirim teks saat ini sebagai JSON
+        body: JSON.stringify({ text }), 
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Save API Error Detail:", errorData);
+        throw new Error(`Gagal menyimpan. Status: ${response.status}. Detail: ${errorData.error || 'Unknown error'}`);
+      }
+      
+      showMessage('Text Saved!');
     } catch (error) {
-      console.error("Error saving text:", error);
-      showMessage('Gagal menyimpan.');
+      console.error("Error saving text to API:", error);
+      showMessage(`Gagal menyimpan: ${error.message.substring(0, 50)}...`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,8 +116,6 @@ export default function Home() {
       // --- PERBAIKAN RESPONSIVITAS ---
       // **PERBAIKAN BARU**: Hapus flexGrow dan tambahkan margin vertikal
       margin: '2rem auto', // Margin atas dan bawah 2rem, horizontal auto untuk pemusatan
-      // Hapus flexGrow: 1
-      // Hapus minHeight: 0
       // ----------------------------------------
 
       padding: '2rem',
@@ -189,7 +214,7 @@ export default function Home() {
 
       {/* Terapkan styles.card ke elemen utama */}
       <main style={styles.card}>
-        <h1 style={styles.title}>Temp Text Space</h1>
+        <h1 style={styles.title}>Text Space</h1>
         {loading ? (
           <p style={{ textAlign: 'center', color: '#ffffffff' }}>Loading...</p>
         ) : (
@@ -231,14 +256,14 @@ export default function Home() {
                 onMouseUp={() => setIsSimpanActive(false)}
                 onMouseLeave={() => setIsLoadActive(false)}
               >
-                Save
+                {loading ? 'Saving...' : 'Save'}
               </button>
             </div>
           </>
         )}
       </main>
       <footer style={styles.footer}>
-        Made with React & Cinta | Dhyox
+        "Made with React & Love" -Dhyox 
       </footer>
     </div>
   );

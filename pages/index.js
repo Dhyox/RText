@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-// Variabel global yang disediakan oleh environment Canvas untuk Firebase
+// Variabel global yang disediakan oleh environment Canvas untuk Firebase (Tidak digunakan dalam implementasi ini)
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
@@ -8,16 +8,34 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
 // Ganti alert bawaan dengan fungsi untuk menampilkan pesan di UI (sesuai instruksi)
 const useMessage = () => {
   const [message, setMessage] = useState(null);
-  const showMessage = (text) => {
-    setMessage(text);
+  const showMessage = (text, type = 'success') => {
+    setMessage({ text, type });
     setTimeout(() => setMessage(null), 3000);
   };
   return [message, showMessage];
 };
 
+// Fungsi untuk memformat tanggal
+const formatTimestamp = (date) => {
+    // Menggunakan opsi bahasa Indonesia untuk format yang jelas
+    // Default locale: 'en-US'
+    return new Intl.DateTimeFormat('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit', 
+        hour12: false // Menggunakan format 24 jam
+    }).format(date);
+};
+
 
 export default function Home() {
   const [text, setText] = useState('');
+  // State baru untuk menyimpan timestamp terakhir disimpan
+  const [lastUpdated, setLastUpdated] = useState('Belum pernah disimpan');
+  
   const [loading, setLoading] = useState(true);
   const [isSimpanActive, setIsSimpanActive] = useState(false);
   const [isLoadActive, setIsLoadActive] = useState(false);
@@ -41,16 +59,30 @@ export default function Home() {
       
       const data = await response.json();
       
-      // Mengambil properti 'text' dari respons JSON (sesuai format data.json)
+      // Mengambil properti 'text' dari respons JSON
       const loadedText = data.text || 'Teks awal. Mulai mengetik di sini!';
       
+      // Mengambil properti 'timestamp' atau 'lastUpdated' dari respons JSON
+      // data.lastUpdated digunakan untuk mengatasi format data.json Anda
+      // data.timestamp digunakan untuk format yang digunakan oleh fungsi saveText
+      const loadedTimestamp = data.lastUpdated || data.timestamp; 
+
       setText(loadedText);
+      
+      // Jika timestamp dimuat dari API, gunakan itu. Jika tidak, tetap gunakan default.
+      if (loadedTimestamp) {
+        setLastUpdated(formatTimestamp(new Date(loadedTimestamp)));
+      } else {
+        setLastUpdated('Data dimuat, tetapi tidak ada info waktu simpan.');
+      }
+      
       showMessage('Text Loaded.');
     } catch (error) {
       console.error("Error loading text from API:", error);
       // Fallback ke teks default jika gagal memuat
       setText('Gagal memuat teks dari GitHub. Mulai mengetik di sini!'); 
-      showMessage('Failed load text.');
+      setLastUpdated('Gagal memuat info waktu simpan.');
+      showMessage('Failed load text.', 'error');
     } finally {
       setLoading(false);
     }
@@ -64,28 +96,38 @@ export default function Home() {
   const saveText = async () => {
     setLoading(true);
     try {
-      // Panggil endpoint API yang di-host oleh save.js
-      const response = await fetch('/api/save', {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-        },
-        // Kirim teks saat ini sebagai JSON
-        body: JSON.stringify({ text }), 
-      });
+        // Buat timestamp saat ini
+        const now = new Date();
+        const timestampString = now.toISOString(); // Format ISO untuk penyimpanan
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Save API Error Detail:", errorData);
-        throw new Error(`Gagal menyimpan. Status: ${response.status}. Detail: ${errorData.error || 'Unknown error'}`);
-      }
-      
-      showMessage('Text Saved!');
+        // Panggil endpoint API yang di-host oleh save.js
+        const response = await fetch('/api/save', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+            },
+            // Kirim teks dan timestamp saat ini sebagai JSON. 
+            // Menggunakan kunci 'lastUpdated' untuk konsistensi dengan data.json Anda
+            body: JSON.stringify({ 
+                text: text,
+                lastUpdated: timestampString 
+            }), 
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Save API Error Detail:", errorData);
+            throw new Error(`Gagal menyimpan. Status: ${response.status}. Detail: ${errorData.error || 'Unknown error'}`);
+        }
+        
+        // Update state local setelah berhasil disimpan
+        setLastUpdated(formatTimestamp(now));
+        showMessage('Text Saved!');
     } catch (error) {
-      console.error("Error saving text to API:", error);
-      showMessage(`Gagal menyimpan: ${error.message.substring(0, 50)}...`);
+        console.error("Error saving text to API:", error);
+        showMessage(`Gagal menyimpan: ${error.message.substring(0, 50)}...`, 'error');
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
@@ -113,11 +155,8 @@ export default function Home() {
     card: {
       maxWidth: '700px',
       width: '100%',
-      // --- PERBAIKAN RESPONSIVITAS ---
       // **PERBAIKAN BARU**: Hapus flexGrow dan tambahkan margin vertikal
       margin: '2rem auto', // Margin atas dan bawah 2rem, horizontal auto untuk pemusatan
-      // ----------------------------------------
-
       padding: '2rem',
       borderRadius: '1.5rem',
       backgroundColor: '#212121', // Background yang sama dengan tombol
@@ -134,11 +173,18 @@ export default function Home() {
       color: '#ffffffff',
       fontSize: '2.5rem', 
       fontWeight: '800', 
-      marginBottom: '2rem', 
+      marginBottom: '1rem', // Kurangi margin
       textAlign: 'center',
       letterSpacing: '0.1em', 
       textShadow: '0 4px 8px rgba(0, 0, 0, 0.5), 0 -4px 8px rgba(47, 47, 47, 0.2)',
       transition: 'all 0.3s ease',
+    },
+    // Gaya untuk timestamp
+    timestamp: {
+        color: '#aaaaaa',
+        textAlign: 'center',
+        fontSize: '0.9rem',
+        marginBottom: '2rem', // Tambahkan margin bawah untuk memisahkan dari textarea
     },
     // Sesuaikan textarea untuk efek cekung
     textarea: {
@@ -194,7 +240,7 @@ export default function Home() {
         position: 'fixed',
         top: '1rem',
         right: '1rem',
-        backgroundColor: '#4caf50',
+        backgroundColor: (message && message.type === 'error') ? '#dc3545' : '#4caf50',
         color: 'white',
         padding: '0.75rem 1.5rem',
         borderRadius: '0.5rem',
@@ -209,12 +255,18 @@ export default function Home() {
     <div style={styles.container}>
       {/* Kotak Pesan */}
       <div style={styles.messageBox}>
-        {message}
+        {message ? message.text : ''}
       </div>
 
       {/* Terapkan styles.card ke elemen utama */}
       <main style={styles.card}>
         <h1 style={styles.title}>Text Space</h1>
+        
+        {/* Tambahkan Timestamp di bawah judul */}
+        <p style={styles.timestamp}>
+            Last Updated: <strong>{lastUpdated}</strong>
+        </p>
+        
         {loading ? (
           <p style={{ textAlign: 'center', color: '#ffffffff' }}>Loading...</p>
         ) : (
@@ -254,7 +306,7 @@ export default function Home() {
                 onClick={saveText}
                 onMouseDown={() => setIsSimpanActive(true)}
                 onMouseUp={() => setIsSimpanActive(false)}
-                onMouseLeave={() => setIsLoadActive(false)}
+                onMouseLeave={() => setIsSimpanActive(false)}
               >
                 {loading ? 'Saving...' : 'Save'}
               </button>

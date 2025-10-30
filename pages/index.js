@@ -88,7 +88,7 @@ export default function Home() {
   return (
     <div style={styles.container}>
       <main style={styles.main}>
-        <h1 style={styles.title}>✨ Ruang Teks</h1>
+        <h1 style={styles.title}>RTeks</h1>
         {loading ? (
           <p style={{ textAlign: 'center' }}>Memuat...</p>
         ) : (
@@ -113,9 +113,9 @@ export default function Home() {
           </>
         )}
       </main>
-      <footer style={styles.footer}>
-        Dibuat oleh <strong> D </strong> dengan 🤖 
-      </footer>
+      {/* <footer style={styles.footer}>
+        Dibuat oleh <strong> D </strong> 
+      </footer> */}
     </div>
   );
 }

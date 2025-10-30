@@ -1,6 +1,6 @@
 
 {
-  "name": "ruang-teks",
+  "name": "rteks",
   "version": "0.1",
   "scripts": {
     "dev": "next dev",

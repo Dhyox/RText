@@ -1,8 +1,8 @@
 export default async function handler(req, res) {
   try {
     const token = process.env.GITHUB_TOKEN;
-    /*const response = await fetch(
-      "https://api.github.com/repos/fajarnadril/RuangTeks/contents/data.json",
+    const response = await fetch(
+      "https://api.github.com/repos/dhyox/RText/contents/data.json",
       {
         headers: { Authorization: `Bearer ${token}` },
         cache: 'no-store'
@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     );
     const data = await response.json();
     const text = JSON.parse(Buffer.from(data.content, 'base64').toString());
-    */
+    
     // 🔥 Stop all levels of cache
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');

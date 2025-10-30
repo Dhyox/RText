@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     const token = process.env.GITHUB_TOKEN;
 
     // Ambil SHA dari file data.json di GitHub
-    /*const shaRes = await fetch("https://api.github.com/repos/fajarnadril/RuangTeks/contents/data.json", {
+    const shaRes = await fetch("https://api.github.com/repos/dhyox/RText/contents/data.json", {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
     }
 
     // Update file data.json
-    const response = await fetch("https://api.github.com/repos/fajarnadril/RuangTeks/contents/data.json", {
+    const response = await fetch("https://api.github.com/repos/dhyox/RText/contents/data.json", {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
         sha: shaData.sha
       })
     });
-    */
+    
     const resJson = await response.json();
     console.log("📦 SAVE RESPONSE:", resJson);
 

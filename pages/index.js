@@ -76,13 +76,13 @@ export default function Home() {
         setLastUpdated('Data dimuat, tetapi tidak ada info waktu simpan.');
       }
       
-      showMessage('Text Loaded.');
+      showMessage('Text Loaded');
     } catch (error) {
       console.error("Error loading text from API:", error);
       // Fallback ke teks default jika gagal memuat
       setText('Gagal memuat teks dari GitHub. Mulai mengetik di sini!'); 
       setLastUpdated('Gagal memuat info waktu simpan.');
-      showMessage('Failed load text.', 'error');
+      showMessage('Failed load text', 'error');
     } finally {
       setLoading(false);
     }
@@ -154,7 +154,7 @@ export default function Home() {
     // GANTI styles.main menjadi styles.card dengan gaya neumorphic
     card: {
       maxWidth: '700px',
-      width: '100%',
+      width: '75%',
       // **PERBAIKAN BARU**: Hapus flexGrow dan tambahkan margin vertikal
       margin: '2rem auto', // Margin atas dan bawah 2rem, horizontal auto untuk pemusatan
       padding: '2rem',
@@ -239,7 +239,7 @@ export default function Home() {
     messageBox: {
         position: 'fixed',
         top: '1rem',
-        right: '1rem',
+        right: '',
         backgroundColor: (message && message.type === 'error') ? '#dc3545' : '#4caf50',
         color: 'white',
         padding: '0.75rem 1.5rem',

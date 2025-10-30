@@ -37,7 +37,7 @@ export default function Home() {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      backgroundColor: '#f8f9fa',
+      backgroundColor: '#181818ff',
       padding: '2rem'
     },
     main: {
@@ -56,7 +56,7 @@ export default function Home() {
       padding: '1rem',
       fontSize: '1rem',
       borderRadius: '0.3rem',
-      border: '1px solid #ced4da',
+      border: '1px solid #1f1f1fff',
       marginBottom: '1rem',
       resize: 'vertical'
     },
@@ -70,7 +70,7 @@ export default function Home() {
       fontSize: '1rem',
       borderRadius: '0.3rem',
       border: '1px solid transparent',
-      backgroundColor: '#007bff',
+      backgroundColor: '#181818ff',
       color: 'white',
       cursor: 'pointer',
       transition: 'background-color 0.3s ease'
@@ -101,7 +101,7 @@ export default function Home() {
               style={styles.textarea}
             />
             <div style={styles.buttonGroup}>
-              <button style={styles.button} onClick={saveText}>Simpan</button>
+              <button style={styles.button}onClick={saveText}>Simpan</button>
               <button
                 style={{ ...styles.button, backgroundColor: '#6c757d' }}
                 onClick={loadText}

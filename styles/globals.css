@@ -1,0 +1,10 @@
+/* Dalam file CSS global (misalnya: globals.css) */
+html, body {
+    margin: 0;
+    padding: 0;
+    /* Opsional: memastikan elemen membentang penuh */
+    height: 100%; 
+    width: 100%;
+    /* Ini penting untuk memastikan warna latar belakang Anda di body muncul */
+    background-color: #181818ff; 
+}

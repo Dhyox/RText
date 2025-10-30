@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 
 export default function Home() {
@@ -7,6 +6,8 @@ export default function Home() {
 
   const loadText = async () => {
     setLoading(true);
+    // Tambahkan delay kecil untuk demonstrasi loading
+    await new Promise(resolve => setTimeout(resolve, 500)); 
     const res = await fetch('/api/load?ts=' + Date.now());
     const data = await res.json();
     setText(data.text || '');
@@ -30,6 +31,10 @@ export default function Home() {
     }
   };
 
+  // 1. TAMBAHKAN STATE UNTUK MELACAK TOMBOL YANG DITEKAN
+  const [isSimpanActive, setIsSimpanActive] = useState(false);
+  const [isLoadActive, setIsLoadActive] = useState(false);
+
   const styles = {
     container: {
       fontFamily: 'sans-serif',
@@ -46,6 +51,7 @@ export default function Home() {
       margin: '0 auto'
     },
     title: {
+      color: '#ffffffff',
       fontSize: '2rem',
       fontWeight: '600',
       marginBottom: '1rem',
@@ -58,22 +64,34 @@ export default function Home() {
       borderRadius: '0.3rem',
       border: '1px solid #1f1f1fff',
       marginBottom: '1rem',
-      resize: 'vertical'
+      resize: 'vertical',
+      backgroundColor: '#2c2c2c', // Sedikit perubahan untuk kontras
+      color: '#ffffff'
     },
     buttonGroup: {
       display: 'flex',
       justifyContent: 'center',
       gap: '1rem'
     },
-    button: {
-      padding: '0.5rem 1.5rem',
-      fontSize: '1rem',
-      borderRadius: '0.3rem',
-      border: '1px solid transparent',
-      backgroundColor: '#181818ff',
-      color: 'white',
+    // 2. GAYA TOMBOL BARU DARI UIVERSE
+    newButton: {
+      color: '#fff',
+      padding: '0.7em 1.7em', // Padding dari Uiverse
+      fontSize: '18px',
+      borderRadius: '0.5em',
+      background: '#212121',
+      border: '1px solid #212121',
+      transition: 'all 0.3s',
+      boxShadow: '6px 6px 12px #000, -6px -6px 12px #2f2f2f',
       cursor: 'pointer',
-      transition: 'background-color 0.3s ease'
+      // Reset properti yang mungkin diatur di tempat lain
+      outline: 'none', 
+    },
+    // 3. GAYA TOMBOL BARU UNTUK STATE :ACTIVE (TEKAN)
+    newButtonActive: {
+      color: '#666',
+      boxShadow: 'inset 4px 4px 12px #000, inset -4px -4px 12px #1f1f1f',
+      background: '#212121', // Pastikan background tetap saat ditekan
     },
     footer: {
       textAlign: 'center',
@@ -90,7 +108,7 @@ export default function Home() {
       <main style={styles.main}>
         <h1 style={styles.title}>RTeks</h1>
         {loading ? (
-          <p style={{ textAlign: 'center' }}>Memuat...</p>
+          <p style={{ textAlign: 'center', color: '#ffffffff' }}>Memuat...</p>
         ) : (
           <>
             <textarea
@@ -101,11 +119,37 @@ export default function Home() {
               style={styles.textarea}
             />
             <div style={styles.buttonGroup}>
-              <button style={styles.button}onClick={saveText}>Simpan</button>
+              {/* TOMBOL SIMPAN */}
               <button
-                style={{ ...styles.button, backgroundColor: '#6c757d' }}
+                // Terapkan gaya default tombol baru
+                style={{ 
+                    ...styles.newButton, 
+                    // Terapkan gaya active jika isSimpanActive true
+                    ...(isSimpanActive ? styles.newButtonActive : {}) 
+                }}
+                onClick={saveText}
+                onMouseDown={() => setIsSimpanActive(true)}
+                onMouseUp={() => setIsSimpanActive(false)}
+                onMouseLeave={() => setIsSimpanActive(false)}
+              >
+                Simpan
+              </button>
+              
+              {/* TOMBOL LOAD */}
+              <button
+                // Terapkan gaya default tombol baru
+                style={{ 
+                    ...styles.newButton, 
+                    // Sedikit ubah warna untuk tombol 'Load' agar berbeda
+                    background: '#6c757d', 
+                    border: '1px solid #6c757d',
+                    ...(isLoadActive ? styles.newButtonActive : {}) 
+                }}
                 onClick={loadText}
                 disabled={loading}
+                onMouseDown={() => setIsLoadActive(true)}
+                onMouseUp={() => setIsLoadActive(false)}
+                onMouseLeave={() => setIsLoadActive(false)}
               >
                 {loading ? 'Memuat...' : 'Load'}
               </button>
@@ -113,9 +157,9 @@ export default function Home() {
           </>
         )}
       </main>
-      {/* <footer style={styles.footer}>
-        Dibuat oleh <strong> D </strong> 
-      </footer> */}
+      <footer style={styles.footer}>
+        Dibuat dengan React & Cinta
+      </footer>
     </div>
   );
 }

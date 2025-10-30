@@ -189,7 +189,7 @@ export default function Home() {
 
       {/* Terapkan styles.card ke elemen utama */}
       <main style={styles.card}>
-        <h1 style={styles.title}>D'Texts</h1>
+        <h1 style={styles.title}>Temp Text Space</h1>
         {loading ? (
           <p style={{ textAlign: 'center', color: '#ffffffff' }}>Loading...</p>
         ) : (
@@ -238,7 +238,7 @@ export default function Home() {
         )}
       </main>
       <footer style={styles.footer}>
-        Dibuat dengan React & Cinta
+        Made with React & Cinta | Dhyox
       </footer>
     </div>
   );
